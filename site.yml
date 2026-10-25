@@ -1,0 +1,17 @@
+- name: 모든 서버 공통 설정
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: 로드밸런서 (HAProxy + Keepalived)
+  hosts: lb
+  become: true
+  roles:
+    - lb
+
+- name: WAS (JBoss EAP)
+  hosts: was
+  become: true
+  roles:
+    - was

@@ -1,0 +1,52 @@
+- name: 패키지 설치
+  ansible.builtin.dnf:
+    name:
+      - haproxy
+      - keepalived
+      - psmisc
+    state: present
+
+- name: HAProxy 설정 배포 (문법 검사 후 적용)
+  ansible.builtin.template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    validate: haproxy -c -f %s
+  notify: restart haproxy
+
+- name: Keepalived 설정 배포
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify: restart keepalived
+
+- name: SELinux에서 HAProxy가 8080 포트로 연결하도록 허용
+  ansible.posix.seboolean:
+    name: haproxy_connect_any
+    state: true
+    persistent: true
+
+- name: 방화벽 HTTP 허용
+  ansible.posix.firewalld:
+    service: http
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: 방화벽 VRRP 허용
+  ansible.posix.firewalld:
+    rich_rule: rule protocol value="vrrp" accept
+    permanent: true
+    immediate: true
+    state: enabled
+
+- name: HAProxy 실행 및 자동 시작
+  ansible.builtin.service:
+    name: haproxy
+    state: started
+    enabled: true
+
+- name: Keepalived 실행 및 자동 시작
+  ansible.builtin.service:
+    name: keepalived
+    state: started
+    enabled: true

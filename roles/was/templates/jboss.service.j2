@@ -1,0 +1,13 @@
+[Unit]
+Description=JBoss EAP
+After=network.target
+
+[Service]
+User=jboss
+Group=jboss
+ExecStart=/opt/jboss/bin/standalone.sh -b 0.0.0.0 -bmanagement 127.0.0.1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,39 @@
+- name: 기본 패키지 설치
+  ansible.builtin.dnf:
+    name:
+      - vim
+      - chrony
+      - firewalld
+      - tar
+      - unzip
+    state: present
+
+- name: 시간 동기화(chronyd) 실행 및 자동 시작
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: 방화벽(firewalld) 실행 및 자동 시작
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: true
+
+- name: 운영 계정 ops 생성 (wheel 그룹)
+  ansible.builtin.user:
+    name: ops
+    groups: wheel
+    append: true
+
+- name: 로그인 안내 문구 설정
+  ansible.builtin.copy:
+    dest: /etc/motd
+    content: "이 서버는 Ansible로 관리됩니다. 직접 수정하지 마세요.\n"
+
+- name: 시간대 Asia/Seoul 설정
+  ansible.builtin.file:
+    src: /usr/share/zoneinfo/Asia/Seoul
+    dest: /etc/localtime
+    state: link
+    force: true
